@@ -1,73 +1,138 @@
 app:
-  version_check_url: "https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version"
-  show_version_update: true # 控制显示版本更新提示，改成 false 将不接受新版本提示
-
+  show_version_update: true
+  version_check_url: https://raw.githubusercontent.com/sansan0/TrendRadar/refs/heads/master/version
 crawler:
-  request_interval: 1000 # 请求间隔(毫秒)
-  enable_crawler: true # 是否启用爬取新闻功能，false 时直接停止程序
-  use_proxy: false # 是否启用代理，false 时为关闭
-  default_proxy: "http://127.0.0.1:10086"
-
-# 🔸 daily（当日汇总模式）
-#   • 推送时机：按时推送
-#   • 显示内容：当日所有匹配新闻 + 新增新闻区域
-#   • 适用场景：日报总结、全面了解当日热点趋势
-#
-# 🔸 current（当前榜单模式）
-#   • 推送时机：按时推送
-#   • 显示内容：当前榜单匹配新闻 + 新增新闻区域
-#   • 适用场景：实时热点追踪、了解当前最火的内容
-#
-# 🔸 incremental（增量监控模式）
-#   • 推送时机：有新增才推送
-#   • 显示内容：新出现的匹配频率词新闻
-#   • 适用场景：避免重复信息干扰
-
-report:
-  mode: "daily" # 可选: "daily"|"incremental"|"current"
-  rank_threshold: 5 # 排名高亮阈值
-
+  default_proxy: http://127.0.0.1:10086
+  enable_crawler: true
+  request_interval: 1000
+  use_proxy: false
 notification:
-  enable_notification: true # 是否启用通知功能，false 时不发送手机通知
-  message_batch_size: 4000 # 消息分批大小（字节）(这个配置别动)
-  batch_send_interval: 1 # 批次发送间隔（秒）
-  feishu_message_separator: "━━━━━━━━━━━━━━━━━━━" # feishu 消息分割线
-
+  batch_send_interval: 1
+  enable_notification: true
+  feishu_message_separator: ━━━━━━━━━━━━━━━━━━━
+  message_batch_size: 4000
   webhooks:
-    feishu_url: "" # 飞书机器人的 webhook URL
-    dingtalk_url: "" # 钉钉机器人的 webhook URL
-    wework_url: "" # 企业微信机器人的 webhook URL
-    telegram_bot_token: "" # Telegram Bot Token
-    telegram_chat_id: "" # Telegram Chat ID
-
-# 用于让关注度更高的新闻在更前面显示，合起来是 1 就行
-weight:
-  rank_weight: 0.6 # 排名权重
-  frequency_weight: 0.3 # 频次权重
-  hotness_weight: 0.1 # 热度权重
-
-# 增加无聊的小知识
-# 这里的 name 你可以定义任意名称，只具有显示作用，不会影响数据的处理
+    dingtalk_url: ''
+    feishu_url: https://www.feishu.cn/flow/api/trigger-webhook/
+    telegram_bot_token: ''
+    telegram_chat_id: ''
+    wework_url: ''
 platforms:
-  - id: "toutiao"
-    name: "今日头条"
-  - id: "baidu"
-    name: "百度热搜"
-  - id: "wallstreetcn-hot"
-    name: "华尔街见闻"
-  - id: "thepaper"
-    name: "澎湃新闻"
-  - id: "bilibili-hot-search"
-    name: "bilibili 热搜"
-  - id: "cls-hot"
-    name: "财联社热门"
-  - id: "ifeng"
-    name: "凤凰网"
-  - id: "tieba"
-    name: "贴吧"
-  - id: "weibo"
-    name: "微博"
-  - id: "douyin"
-    name: "抖音"
-  - id: "zhihu"
-    name: "知乎"
+- enabled: true
+  id: toutiao
+  name: 今日头条
+- enabled: true
+  id: baidu
+  name: 百度热搜
+- enabled: true
+  id: wallstreetcn-hot
+  name: 华尔街见闻
+- enabled: true
+  id: thepaper
+  name: 澎湃新闻
+- enabled: true
+  id: bilibili-hot-search
+  name: bilibili 热搜
+- enabled: true
+  id: cls-hot
+  name: 财联社热门
+- enabled: true
+  id: ifeng
+  name: 凤凰网
+- enabled: true
+  id: tieba
+  name: 贴吧
+- enabled: true
+  id: weibo
+  name: 微博
+- enabled: true
+  id: douyin
+  name: 抖音
+- enabled: true
+  id: zhihu
+  name: 知乎
+- enabled: true
+  id: 36kr
+  name: 36氪
+- enabled: false
+  id: coolapk
+  name: 酷安
+- enabled: true
+  id: cankaoxiaoxi
+  name: 参考消息
+- enabled: false
+  id: chongbuluo
+  name: 虫部落
+- enabled: false
+  id: fastbull
+  name: 快牛财经
+- enabled: false
+  id: gelonghui
+  name: 格隆汇
+- enabled: true
+  id: github
+  name: GitHub Trending
+- enabled: true
+  id: hackernews
+  name: Hacker News
+- enabled: false
+  id: hupu
+  name: 虎扑
+- enabled: false
+  id: ithome
+  name: IT之家
+- enabled: false
+  id: jin10
+  name: 金十数据
+- enabled: true
+  id: juejin
+  name: 掘金
+- enabled: false
+  id: kaopu
+  name: 靠谱新闻
+- enabled: false
+  id: kuaishou
+  name: 快手
+- enabled: false
+  id: linuxdo
+  name: Linux.do
+- enabled: false
+  id: mktnews
+  name: 市场资讯
+- enabled: false
+  id: nowcoder
+  name: 牛客网
+- enabled: false
+  id: pcbeta
+  name: 远景论坛
+- enabled: false
+  id: producthunt
+  name: Product Hunt
+- enabled: true
+  id: smzdm
+  name: 什么值得买
+- enabled: false
+  id: solidot
+  name: 奇客资讯
+- enabled: false
+  id: sputniknewscn
+  name: 俄罗斯卫星通讯社
+- enabled: false
+  id: sspai
+  name: 少数派
+- enabled: false
+  id: v2ex
+  name: V2EX
+- enabled: true
+  id: xueqiu
+  name: 雪球
+- enabled: true
+  id: zaobao
+  name: 联合早报
+report:
+  mode: incremental
+  rank_threshold: 5
+weight:
+  frequency_weight: 0.3
+  hotness_weight: 0.1
+  rank_weight: 0.6

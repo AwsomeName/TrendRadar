@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrendRadar 管理控制台</title>
+    <link rel="stylesheet" href="static/admin.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 TrendRadar</h1>
+            <p>智能热点新闻聚合管理控制台</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dashboard')">📊 仪表盘</button>
+            <button class="nav-tab" onclick="showTab('keywords')">🔍 关键词管理</button>
+            <button class="nav-tab" onclick="showTab('config')">⚙️ 配置管理</button>
+            <button class="nav-tab" onclick="showTab('platforms')">🌐 平台管理</button>
+            <button class="nav-tab" onclick="showTab('manual')">🚀 手动推送</button>
+            <button class="nav-tab" onclick="showTab('history')">📚 历史记录</button>
+        </div>
+
+        <!-- 仪表盘 -->
+        <div id="dashboard" class="tab-content active">
+            <h2>系统状态</h2>
+            <div id="status-loading" class="loading">正在加载系统状态...</div>
+            <div id="status-content" style="display: none;">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-value" id="config-status">-</div>
+                        <div class="status-label">配置文件状态</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="keywords-status">-</div>
+                        <div class="status-label">关键词文件状态</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="today-status">-</div>
+                        <div class="status-label">今日数据状态</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="version-status">-</div>
+                        <div class="status-label">系统版本</div>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <h3>最新文件</h3>
+                    <div id="latest-file-info">暂无数据</div>
+                </div>
+                
+                <div class="status-card">
+                    <h3>当前时间</h3>
+                    <div id="current-time">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关键词管理 -->
+        <div id="keywords" class="tab-content">
+            <h2>关键词管理</h2>
+            <div id="keywords-alert"></div>
+            
+            <div class="form-group">
+                <label class="form-label">关键词配置文件内容：</label>
+                <textarea id="keywords-content" class="form-textarea" placeholder="正在加载关键词配置..."></textarea>
+                <small style="color: #666; margin-top: 5px; display: block;">
+                    提示：每行一个关键词或关键词组，以#开头的为注释，以!开头的为排除词
+                </small>
+            </div>
+            
+            <div>
+                <button class="btn btn-primary" onclick="saveKeywords()">💾 保存关键词</button>
+                <button class="btn btn-secondary" onclick="loadKeywords()">🔄 重新加载</button>
+            </div>
+        </div>
+
+        <!-- 配置管理 -->
+        <div id="config" class="tab-content">
+            <h2>配置管理</h2>
+            <div id="config-alert"></div>
+            
+            <form id="config-form">
+                <div class="config-section">
+                    <h3>报告配置</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">报告模式：</label>
+                            <select class="form-select" name="report.mode">
+                                <option value="daily">当日汇总模式</option>
+                                <option value="incremental">增量监控模式</option>
+                                <option value="current">当前榜单模式</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">排名高亮阈值：</label>
+                            <input type="number" class="form-input" name="report.rank_threshold" min="1" max="50">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>通知配置</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="notification.enable_notification" id="enable_notification">
+                                <label for="enable_notification">启用通知功能</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4>Webhook配置</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">飞书Webhook URL：</label>
+                            <input type="url" class="form-input" name="notification.webhooks.feishu_url">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">钉钉Webhook URL：</label>
+                            <input type="url" class="form-input" name="notification.webhooks.dingtalk_url">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+            <div>
+                <button class="btn btn-primary" onclick="saveConfig()">💾 保存配置</button>
+                <button class="btn btn-secondary" onclick="loadConfig()">🔄 重新加载</button>
+            </div>
+        </div>
+
+        <!-- 手动推送 -->
+        <div id="manual" class="tab-content">
+            <h2>手动操作</h2>
+            <div id="manual-alert"></div>
+            
+            <div class="status-card">
+                <h3>测试爬取</h3>
+                <p>测试从各平台爬取数据，验证配置是否正确</p>
+                <button class="btn btn-warning" onclick="testCrawl()">🧪 测试爬取数据</button>
+            </div>
+            
+            <div class="status-card">
+                <h3>手动推送</h3>
+                <p>立即执行一次完整的新闻分析和推送流程</p>
+                <button class="btn btn-success" onclick="manualPush()">🚀 立即推送</button>
+            </div>
+            
+            <div id="manual-result" style="display: none;">
+                <h3>操作结果</h3>
+                <div id="manual-result-content"></div>
+            </div>
+        </div>
+
+        <!-- 平台管理 -->
+        <div id="platforms" class="tab-content">
+            <h2>平台管理</h2>
+            <div id="platforms-alert"></div>
+            
+            <div class="status-card">
+                <h3>当前支持的平台</h3>
+                <p>管理新闻数据源平台的配置，可以启用/禁用平台或调整平台参数</p>
+                
+                <div id="platforms-loading" class="loading">正在加载平台配置...</div>
+                <div id="platforms-content" style="display: none;">
+                    <div class="platforms-grid" id="platforms-grid">
+                        <!-- 平台卡片将在这里动态生成 -->
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="savePlatforms()">💾 保存平台配置</button>
+                        <button class="btn btn-secondary" onclick="loadPlatforms()">🔄 重新加载</button>
+                        <button class="btn btn-success" onclick="addNewPlatform()">➕ 添加新平台</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <h3>平台配置说明</h3>
+                <ul style="color: #666; line-height: 1.6;">
+                    <li><strong>平台ID：</strong>平台的唯一标识符，用于数据抓取</li>
+                    <li><strong>平台名称：</strong>显示在报告中的平台名称</li>
+                    <li><strong>启用状态：</strong>控制是否从该平台抓取数据</li>
+                    <li><strong>权重：</strong>影响该平台新闻在排行榜中的权重（1-10）</li>
+                    <li><strong>描述：</strong>平台的简要说明</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div id="history" class="tab-content">
+            <h2>历史记录</h2>
+            <div id="history-loading" class="loading">正在加载历史记录...</div>
+            <div id="history-content"></div>
+        </div>
+    </div>
+
+    <script src="static/admin.js"></script>
+</body>
+</html>

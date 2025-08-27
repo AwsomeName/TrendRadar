@@ -3298,18 +3298,41 @@ class NewsAnalyzer:
 
 
 def main():
-    try:
-        analyzer = NewsAnalyzer()
-        analyzer.run()
-    except FileNotFoundError as e:
-        print(f"❌ 配置文件错误: {e}")
-        print("\n请确保以下文件存在:")
-        print("  • config/config.yaml")
-        print("  • config/frequency_words.txt")
-        print("\n参考项目文档进行正确配置")
-    except Exception as e:
-        print(f"❌ 程序运行错误: {e}")
-        raise
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='TrendRadar - 热点新闻分析工具')
+    parser.add_argument('--web', action='store_true', help='启动Web管理界面')
+    parser.add_argument('--port', type=int, default=5000, help='Web服务器端口 (默认: 5000)')
+    parser.add_argument('--host', type=str, default='localhost', help='Web服务器主机 (默认: localhost)')
+    
+    args = parser.parse_args()
+    
+    if args.web:
+        # 启动Web管理界面
+        try:
+            from web_server import app
+            print(f"🚀 启动TrendRadar Web管理界面...")
+            print(f"📱 访问地址: http://{args.host}:{args.port}")
+            print(f"📊 管理界面: http://{args.host}:{args.port}/admin.html")
+            app.run(host=args.host, port=args.port, debug=False)
+        except ImportError:
+            print("❌ 无法导入web_server模块，请确保web_server.py文件存在")
+        except Exception as e:
+            print(f"❌ Web服务器启动失败: {e}")
+    else:
+        # 运行原有的新闻分析功能
+        try:
+            analyzer = NewsAnalyzer()
+            analyzer.run()
+        except FileNotFoundError as e:
+            print(f"❌ 配置文件错误: {e}")
+            print("\n请确保以下文件存在:")
+            print("  • config/config.yaml")
+            print("  • config/frequency_words.txt")
+            print("\n参考项目文档进行正确配置")
+        except Exception as e:
+            print(f"❌ 程序运行错误: {e}")
+            raise
 
 
 if __name__ == "__main__":

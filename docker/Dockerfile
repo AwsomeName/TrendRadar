@@ -3,7 +3,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # https://github.com/aptible/supercronic/releases
-ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.34/supercronic-linux-amd64 \
+ENV SUPERCRONIC_URL=https://ghfast.top/https://github.com/aptible/supercronic/releases/download/v0.2.34/supercronic-linux-amd64 \
     SUPERCRONIC_SHA1SUM=e8631edc1775000d119b70fd40339a7238eece14 \
     SUPERCRONIC=supercronic-linux-amd64
 
