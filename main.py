@@ -2590,7 +2590,7 @@ def send_to_feishu(
 
     try:
         response = requests.post(
-            webhook_url, headers=headers, json=payload, proxies=proxies, timeout=30
+            webhook_url, headers=headers, json=payload, proxies=proxies, timeout=60
         )
         if response.status_code == 200:
             print(f"飞书通知发送成功 [{report_type}]")
@@ -2630,8 +2630,8 @@ def send_to_dingtalk(
 
     try:
         response = requests.post(
-            webhook_url, headers=headers, json=payload, proxies=proxies, timeout=30
-        )
+                webhook_url, headers=headers, json=payload, proxies=proxies, timeout=60
+            )
         if response.status_code == 200:
             result = response.json()
             if result.get("errcode") == 0:
@@ -2683,7 +2683,7 @@ def send_to_wework(
 
         try:
             response = requests.post(
-                webhook_url, headers=headers, json=payload, proxies=proxies, timeout=30
+                webhook_url, headers=headers, json=payload, proxies=proxies, timeout=60
             )
             if response.status_code == 200:
                 result = response.json()
@@ -2755,7 +2755,7 @@ def send_to_telegram(
 
         try:
             response = requests.post(
-                url, headers=headers, json=payload, proxies=proxies, timeout=30
+                url, headers=headers, json=payload, proxies=proxies, timeout=60
             )
             if response.status_code == 200:
                 result = response.json()
@@ -2911,10 +2911,11 @@ class NewsAnalyzer:
     ) -> Optional[Tuple[Dict, Dict, Dict, Dict, List, List]]:
         """统一的数据加载和预处理，使用当前监控平台列表过滤历史数据"""
         try:
-            # 获取当前配置的监控平台ID列表
+            # 获取当前监控平台ID列表（只包含启用的平台）
             current_platform_ids = []
             for platform in CONFIG["PLATFORMS"]:
-                current_platform_ids.append(platform["id"])
+                if platform.get("enabled", True):
+                    current_platform_ids.append(platform["id"])
 
             print(f"当前监控平台: {current_platform_ids}")
 
@@ -3147,13 +3148,16 @@ class NewsAnalyzer:
         """执行数据爬取"""
         ids = []
         for platform in CONFIG["PLATFORMS"]:
-            if "name" in platform:
-                ids.append((platform["id"], platform["name"]))
-            else:
-                ids.append(platform["id"])
+            # 只处理启用的平台
+            if platform.get("enabled", True):
+                if "name" in platform:
+                    ids.append((platform["id"], platform["name"]))
+                else:
+                    ids.append(platform["id"])
 
+        enabled_platforms = [p for p in CONFIG["PLATFORMS"] if p.get("enabled", True)]
         print(
-            f"配置的监控平台: {[p.get('name', p['id']) for p in CONFIG['PLATFORMS']]}"
+            f"配置的监控平台: {[p.get('name', p['id']) for p in enabled_platforms]}"
         )
         print(f"开始爬取数据，请求间隔 {self.request_interval} 毫秒")
         ensure_directory_exists("output")
@@ -3171,8 +3175,8 @@ class NewsAnalyzer:
         self, mode_strategy: Dict, results: Dict, id_to_name: Dict, failed_ids: List
     ) -> Optional[str]:
         """执行模式特定逻辑"""
-        # 获取当前监控平台ID列表
-        current_platform_ids = [platform["id"] for platform in CONFIG["PLATFORMS"]]
+        # 获取当前监控平台ID列表（只包含启用的平台）
+        current_platform_ids = [platform["id"] for platform in CONFIG["PLATFORMS"] if platform.get("enabled", True)]
 
         new_titles = detect_latest_new_titles(current_platform_ids)
         time_info = Path(save_titles_to_file(results, id_to_name, failed_ids)).stem

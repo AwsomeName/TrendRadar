@@ -762,6 +762,8 @@ function removePlatform(index) {
     if (confirm('确定要删除这个平台吗？')) {
         platformsData.splice(index, 1);
         renderPlatforms();
+        // 立即保存到后端
+        savePlatforms();
     }
 }
 

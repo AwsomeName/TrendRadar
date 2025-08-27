@@ -28,12 +28,20 @@ def init_analyzer():
     """初始化分析器"""
     global analyzer
     if analyzer is None:
+        # 确保配置已加载
+        load_config()
         analyzer = NewsAnalyzer()
 
 
 @app.route('/')
 def index():
     """主页"""
+    return send_from_directory('.', 'index.html')
+
+
+@app.route('/admin.html')
+def admin():
+    """管理页面"""
     return send_from_directory('.', 'admin.html')
 
 
@@ -117,18 +125,29 @@ def update_keywords():
 def manual_push():
     """手动推送"""
     try:
+        import traceback
+        
+        print("开始初始化分析器...")
         init_analyzer()
+        print("分析器初始化完成")
         
         # 执行分析和推送
+        print("开始执行分析和推送...")
         result = analyzer.run()
+        print(f"推送完成，结果: {result}")
         
         return jsonify({
             "success": True, 
             "message": "手动推送完成",
             "result": result
         })
+            
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        import traceback
+        error_msg = f"推送失败: {str(e)}"
+        print(f"推送错误: {error_msg}")
+        print(f"错误堆栈: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": error_msg}), 500
 
 
 @app.route('/api/test-crawl', methods=['POST'])
