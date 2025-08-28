@@ -263,6 +263,38 @@ def get_history_file(file_path):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@app.route('/api/execution-history', methods=['GET'])
+def get_execution_history():
+    """获取推送执行历史记录"""
+    try:
+        history_file = Path("logs") / "execution_history.jsonl"
+        
+        if not history_file.exists():
+            return jsonify({"success": True, "data": []})
+        
+        # 读取历史记录
+        history_data = []
+        with open(history_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        entry = json.loads(line)
+                        history_data.append(entry)
+                    except json.JSONDecodeError:
+                        continue
+        
+        # 按时间倒序排列，最新的在前面
+        history_data.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        
+        # 限制返回最近100条记录
+        history_data = history_data[:100]
+        
+        return jsonify({"success": True, "data": history_data})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/api/platforms', methods=['GET'])
 def get_platforms():
     """获取平台配置"""

@@ -193,8 +193,24 @@
         <!-- 历史记录 -->
         <div id="history" class="tab-content">
             <h2>历史记录</h2>
-            <div id="history-loading" class="loading">正在加载历史记录...</div>
-            <div id="history-content"></div>
+            
+            <!-- 历史记录导航 -->
+            <div class="history-nav">
+                <button class="history-nav-btn active" onclick="TrendRadarAdmin.showHistoryTab('files')">📁 文件记录</button>
+                <button class="history-nav-btn" onclick="TrendRadarAdmin.showHistoryTab('execution')">📊 推送历史</button>
+            </div>
+            
+            <!-- 文件记录 -->
+            <div id="history-files" class="history-tab-content">
+                <div id="history-loading" class="loading">正在加载历史记录...</div>
+                <div id="history-content"></div>
+            </div>
+            
+            <!-- 推送历史 -->
+            <div id="history-execution" class="history-tab-content" style="display: none;">
+                <div id="execution-loading" class="loading">正在加载推送历史...</div>
+                <div id="execution-content"></div>
+            </div>
         </div>
     </div>
 

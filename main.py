@@ -139,11 +139,81 @@ def ensure_directory_exists(directory: str):
 
 
 def get_output_path(subfolder: str, filename: str) -> str:
-    """获取输出路径"""
+    """获取输出文件的完整路径"""
     date_folder = format_date_folder()
     output_dir = Path("output") / date_folder / subfolder
     ensure_directory_exists(str(output_dir))
     return str(output_dir / filename)
+
+
+def save_execution_history(stats: List[Dict], mode: str, notification_sent: bool = False, report_type: str = "") -> None:
+    """保存执行历史记录到日志文件"""
+    try:
+        # 创建历史记录目录
+        history_dir = Path("logs")
+        ensure_directory_exists(str(history_dir))
+        
+        # 计算推送的新闻数量（原始数量，未去重）
+        total_pushed = 0
+        unique_titles = set()
+        
+        for stat in stats:
+            titles = stat.get('titles', {})
+            if isinstance(titles, dict):
+                # 处理titles为字典的情况（按来源分组）
+                for source_id, titles_list in titles.items():
+                    if isinstance(titles_list, list):
+                        total_pushed += len(titles_list)
+                        for title_data in titles_list:
+                            if isinstance(title_data, dict):
+                                title = title_data.get('title', '')
+                                if title:
+                                    unique_titles.add(title)
+            elif isinstance(titles, list):
+                # 处理titles为列表的情况
+                total_pushed += len(titles)
+                for title_data in titles:
+                    if isinstance(title_data, dict):
+                        title = title_data.get('title', '')
+                        if title:
+                            unique_titles.add(title)
+        
+        actual_pushed = len(unique_titles)
+        
+        # 只有在有实际内容时才记录历史
+        # 对于增量模式，如果没有新增内容且没有发送通知，则不记录
+        if mode == "incremental" and total_pushed == 0 and not notification_sent:
+            print("📝 增量模式下无新增内容，跳过历史记录")
+            return
+        
+        # 创建历史记录条目
+        history_entry = {
+            "timestamp": get_beijing_time().strftime("%Y-%m-%d %H:%M:%S"),
+            "mode": mode,
+            "report_type": report_type,
+            "total_pushed": total_pushed,
+            "actual_pushed": actual_pushed,
+            "notification_sent": notification_sent,
+            "keyword_groups": len([stat for stat in stats if len(stat.get('titles', [])) > 0]),  # 只计算有内容的关键词组
+            "details": [
+                {
+                    "keyword": stat.get('word', ''),
+                    "count": len(stat.get('titles', [])) if isinstance(stat.get('titles', []), list) else sum(len(v) if isinstance(v, list) else 0 for v in stat.get('titles', {}).values()),
+                    "weight": stat.get('weight', 0)
+                }
+                for stat in stats if len(stat.get('titles', [])) > 0 or (isinstance(stat.get('titles', {}), dict) and any(len(v) > 0 for v in stat.get('titles', {}).values() if isinstance(v, list)))
+            ]
+        }
+        
+        # 保存到日志文件
+        log_file = history_dir / "execution_history.jsonl"
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(history_entry, ensure_ascii=False) + "\n")
+        
+        print(f"📝 执行历史已记录: 推送 {total_pushed} 条新闻 (去重后 {actual_pushed} 条), 通知发送: {'是' if notification_sent else '否'}")
+        
+    except Exception as e:
+        print(f"⚠️ 保存执行历史失败: {e}")
 
 
 def check_version_update(
@@ -3015,6 +3085,7 @@ class NewsAnalyzer:
     ) -> bool:
         """统一的通知发送逻辑，包含所有判断条件"""
         has_webhook = self._has_webhook_configured()
+        notification_sent = False
 
         if (
             CONFIG["ENABLE_NOTIFICATION"]
@@ -3031,7 +3102,7 @@ class NewsAnalyzer:
                 self.proxy_url,
                 mode=mode,
             )
-            return True
+            notification_sent = True
         elif CONFIG["ENABLE_NOTIFICATION"] and not has_webhook:
             print("⚠️ 警告：通知功能已启用但未配置webhook URL，将跳过通知发送")
         elif not CONFIG["ENABLE_NOTIFICATION"]:
@@ -3051,7 +3122,10 @@ class NewsAnalyzer:
                     f"跳过{mode_strategy['summary_report_type']}通知：未匹配到有效的新闻内容"
                 )
 
-        return False
+        # 保存执行历史记录
+        save_execution_history(stats, mode, notification_sent, report_type)
+
+        return notification_sent
 
     def _generate_summary_report(self, mode_strategy: Dict) -> Optional[str]:
         """生成汇总报告（带通知）"""

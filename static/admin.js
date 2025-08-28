@@ -436,7 +436,29 @@ async function manualPush() {
     }
 }
 
-// 加载历史记录
+// 显示历史记录子标签
+function showHistoryTab(tabName) {
+    // 更新导航按钮状态
+    document.querySelectorAll('.history-nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // 显示对应的内容
+    document.querySelectorAll('.history-tab-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    if (tabName === 'files') {
+        document.getElementById('history-files').style.display = 'block';
+        loadHistory();
+    } else if (tabName === 'execution') {
+        document.getElementById('history-execution').style.display = 'block';
+        loadExecutionHistory();
+    }
+}
+
+// 加载文件历史记录
 async function loadHistory() {
     const loadingElement = document.getElementById('history-loading');
     const contentElement = document.getElementById('history-content');
@@ -461,6 +483,35 @@ async function loadHistory() {
         console.error('加载历史记录失败:', error);
         if (loadingElement) {
             loadingElement.textContent = '加载历史记录失败: ' + error.message;
+        }
+    }
+}
+
+// 加载推送执行历史
+async function loadExecutionHistory() {
+    const loadingElement = document.getElementById('execution-loading');
+    const contentElement = document.getElementById('execution-content');
+    
+    try {
+        if (loadingElement) loadingElement.style.display = 'block';
+        if (contentElement) contentElement.innerHTML = '';
+        
+        const data = await apiRequest('/api/execution-history');
+        
+        if (loadingElement) loadingElement.style.display = 'none';
+        
+        if (contentElement) {
+            if (data.data && data.data.length > 0) {
+                contentElement.innerHTML = renderExecutionHistory(data.data);
+            } else {
+                contentElement.innerHTML = '<p>暂无推送历史记录</p>';
+            }
+        }
+        
+    } catch (error) {
+        console.error('加载推送历史失败:', error);
+        if (loadingElement) {
+            loadingElement.textContent = '加载推送历史失败: ' + error.message;
         }
     }
 }
@@ -832,8 +883,54 @@ async function savePlatforms() {
     }
 }
 
+// 渲染推送执行历史
+function renderExecutionHistory(data) {
+    let html = '<div class="execution-history-table">';
+    html += `
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>执行时间</th>
+                    <th>模式</th>
+                    <th>报告类型</th>
+                    <th>推送条数</th>
+                    <th>去重后数量</th>
+                    <th>通知状态</th>
+                    <th>关键词组</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    data.forEach(record => {
+        const timestamp = new Date(record.timestamp).toLocaleString();
+        const mode = record.mode || '-';
+        const reportType = record.report_type || '-';
+        const totalPushed = record.total_pushed || 0;
+        const actualPushed = record.actual_pushed !== undefined ? record.actual_pushed : totalPushed;
+        const notificationSent = record.notification_sent ? '✅ 已发送' : '❌ 未发送';
+        const keywordGroups = record.keyword_groups || 0;
+        
+        html += `
+            <tr>
+                <td>${timestamp}</td>
+                <td>${mode}</td>
+                <td>${reportType}</td>
+                <td class="number">${totalPushed}</td>
+                <td class="number" style="color: #007bff; font-weight: bold;">${actualPushed}</td>
+                <td class="status ${record.notification_sent ? 'sent' : 'not-sent'}">${notificationSent}</td>
+                <td class="keyword-groups">${keywordGroups}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    return html;
+}
+
 window.TrendRadarAdmin = {
     showTab,
+    showHistoryTab,
     loadSystemStatus,
     loadKeywords,
     saveKeywords,
@@ -845,5 +942,6 @@ window.TrendRadarAdmin = {
     testCrawl,
     manualPush,
     loadHistory,
+    loadExecutionHistory,
     viewFile
 };

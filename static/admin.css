@@ -679,3 +679,110 @@ input:checked + .toggle-slider:before {
     background: white;
     border-style: solid;
 }
+
+/* 历史记录导航 */
+.history-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.history-nav-btn {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.history-nav-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.history-nav-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* 推送历史表格 */
+.execution-history-table {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.history-table th,
+.history-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.history-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.history-table td {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.history-table td.number {
+    text-align: center;
+    font-weight: 600;
+    color: #007bff;
+}
+
+.history-table td.status {
+    text-align: center;
+    font-weight: 500;
+}
+
+.history-table td.status.sent {
+    color: #28a745;
+}
+
+.history-table td.status.not-sent {
+    color: #dc3545;
+}
+
+.history-table td.keyword-groups {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    max-width: 200px;
+}
+
+.history-table tr:hover {
+    background: #f8f9fa;
+}
+
+.history-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* 历史标签内容 */
+.history-tab-content {
+    display: none;
+}
+
+.history-tab-content.active {
+    display: block;
+}
